@@ -21,7 +21,11 @@
   python validate.py
   ```
 
-  
++ 数据集
+
+  链接：https://pan.baidu.com/s/1E0Qp06R9gUx5lGZzFJBOyA  提取码：uihk
+
+  将文件 `data_set_7.csv` 放到 `./data` 路径下
 
 
 
