@@ -67,13 +67,13 @@ def get_bound(df):
 
 
 # 删除超出指定经纬度范围的轨迹
-def filt_data(data):
-    x_min = -8.8
-    x_max = -8.6
-    y_min = 41.10
-    y_max = 41.20
+def filt_data(data, x_min, x_max, y_min, y_max):
+    # x_min = -8.8
+    # x_max = -8.6
+    # y_min = 41.10
+    # y_max = 41.20
     res = {'index': [], 'traj': []}
-    save_path = './data/data_set_2.csv'
+    save_path = './data/data_set_5.csv'
     idx = 0
     for index, row in data.iterrows():
         traj = polyline_to_list(row['traj'])
@@ -82,11 +82,11 @@ def filt_data(data):
             if pos[0] < x_min or pos[0] > x_max or pos[1] < y_min or pos[1] > y_max:
                 out_of_bound = True
                 break
-        if not out_of_bound:
+        if not out_of_bound and len(traj) > 8:
             res['index'].append(idx)
             res['traj'].append(traj)
             idx += 1
-    print('filt num: {}'.format(idx))
+    print('[{}, {}], [{}, {}], len: {}, filt num: {}'.format(x_min, x_max, y_min, y_max, len(data), len(data) - idx))
     res = pd.DataFrame(res)
     res.to_csv(save_path)
 
@@ -104,7 +104,7 @@ def partition_cells(src_data, x1, x2, y1, y2):
     1维度 = 111km
     1精度 = 111 cos \theta
     '''
-    save_path = './data/data_cell_3.csv'
+    save_path = './data/data_set_7.csv'
     y = math.fabs((y1 + y2) / 2) * math.pi / 180
     print('y: {}, cosy: {}'.format(y, math.cos(y)))
     dx = 0.1 / (111 * math.cos(y))  # 100m 对应的纬度
@@ -143,7 +143,7 @@ def del_short_seq(data, seq_len):
 
 
 def split_data_set():
-    data_frame = pd.read_csv('./data/data_set_4.csv')
+    data_frame = pd.read_csv('./data/data_set_7.csv')
     data = []
     thresh = 300000
     cnt = 0
@@ -160,74 +160,91 @@ def split_data_set():
     return list(train_set), list(val_set), list(test_set)
 
 
+def get_all_data():
+    x_min = -8.68500
+    x_max = -8.59766
+    y_min = 41.12
+    y_max = 41.198378
+    y = math.fabs((y_min + y_max) / 2) * math.pi / 180
+    dx = 0.1 / (111 * math.cos(y))  # 100m 对应的纬度
+    dy = 0.1 / 111
+    print(dx)
+    print(dy)
+    print((x_max - x_min) / dx)
+    print((y_max - y_min) / dy)
+
+    data = pd.read_csv('./data/data_set_2.csv')
+
+
+# 经度 73 格 纬度 87 格
+# 获取网格中心坐标
+def cell_to_coordinate(x, y):
+    x_min = -8.68500
+    x_max = -8.59766
+    y_min = 41.12
+    y_max = 41.198378
+    dx = 0.0011966000451121266
+    dy = 0.0009009009009009009
+    return x_min + dx * x + dx / 2, y_min + dy * y + dy / 2
+
+
+def cell_to_num(x, y):
+    return x * 87 + y
+
+
+def num_to_cell(n):
+    return n // 87, n % 87
+
+
 if __name__ == '__main__':
-    pass
-    # data = [
-    #     [[1, 1], [1, 1], [1, 1]],
-    #     [[2, 2], [2.4, 2]],
-    #     [[3, 3], [3, 3]],
-    #     [[4, 4], [4, 4]],
-    #     [[5, 5], [5, 5]],
-    #     [[6, 6], [6, 6]],
-    # ]
-    # a, b, c = torch.utils.data.random_split(data, [3, 2, 1])
-    # a = list(a)
-    # b = list(b)
-    # c = list(c)
-    # print(a)
-    # print(b)
-    # print(c)
+    # # get_all_data()
+    x_min = -8.68500
+    x_max = -8.59766
+    y_min = 41.12
+    y_max = 41.198378
+    # dx = 0.0011966000451121266
+    # dy = 0.0009009009009009009
+    # print((x_max - x_min) / dx)
+    # print((y_max - y_min) / dy)
 
-
-    # a, b, c = split_data_set()
-    # print(type(a))
-    # print(type(b))
-    # print(type(c))
-    # print(len(a))
-    # print(len(b))
-    # print(len(c))
-    # print(a[5])
-    # df = pd.read_csv('./data/data_cell_3.csv')
-    # # filt_data(df)
-    # x_min = -8.8
-    # x_max = -8.6
-    # y_min = 41.10
-    # y_max = 41.20
-    # # partition_cells(df, x_min, x_max, y_min, y_max)
-    # del_short_seq(df, 8)
-
-    # build_data_set_1('train')
-    # x_min = -8.729766
-    # x_max = -7.542072
-    # y_min = 41.062563
-    # y_max = 41.562351
-
-    # x_min = -8.8
-    # x_max = -8.7
-    # y_min = 41.10
-    # y_max = 41.20
-    #
-    #
-    # # get_bound(df)
-    # out_num = 0
-    # for index, row in df.iterrows():
+    data = pd.read_csv('./data/data_set_5.csv')
+    # test_data = data[0: 5]
+    # res = []
+    # for index, row in test_data.iterrows():
     #     traj = polyline_to_list(row['traj'])
+    #     t = []
     #     for pos in traj:
-    #         if pos[0] < x_min or pos[0] > x_max or pos[1] < y_min or pos[1] > y_max:
-    #             out_num += 1
-    #             break
-    #
-    # print(len(df['traj']))
-    # print(out_num)
+    #         x, y = cell_to_coordinate(pos[0], pos[1])
+    #         t.append([x, y])
+    #     res.append(t)
+    # for item in res:
+    #     print(item)
+    # print(torch.tensor(res, dtype=torch.float))
+    # print(data[0: 284100])
+    partition_cells(data[0: 800000], x_min, x_max, y_min, y_max)
+    # filt_data(data, x_min, x_max, y_min, y_max)
 
-    # for index, row in raw_data.iterrows():
-    #     if row['MISSING_DATA'] == True:
-    #         print('missing: {}, {}'.format(index, row['POLYLINE']))
-    #     elif row['POLYLINE'] == '[]':
-    #         print('is missing: {}, {}, {}'.format(index, row['MISSING_DATA'], row['POLYLINE']))
-    #
-    #     if index == 5000:
-    #         break
+    # width = 0.087340
+    #     # height = 0.078378
+    #     #
+    #     # x_min = -8.72
+    #     # x_max = -8.50
+    #     # y_min = 41.10
+    #     # y_max = 41.20
+    #     #
+    #     # x = -8.72
+    #     # dx = 0.005
+    #     # y = 41.10
+    #     # dy = 0.005
+    #     #
+    #     # while x >= x_min and x + width <= x_max:
+    #     #     y = 41.10
+    #     #     while y >= y_min and y + height <= y_max:
+    #     #         filt_data(data, x, x + width, y, y + height)
+    #     #         y += dy
+    #     #     x += dx
+
+    # [-8.684999999999995, -8.597659999999996], [41.12000000000001, 41.19837800000001], len: 982883, filt
 
 
 
