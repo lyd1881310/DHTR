@@ -145,7 +145,7 @@ def del_short_seq(data, seq_len):
 def split_data_set():
     data_frame = pd.read_csv('./data/data_set_7.csv')
     data = []
-    thresh = 300000
+    thresh = 200000
     cnt = 0
     for index, row in data_frame.iterrows():
         data.append(polyline_to_list(row['traj']))
